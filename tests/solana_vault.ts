@@ -1,5 +1,6 @@
-import { createHash } from "crypto";
-import { expect } from "chai";
+import assert from "node:assert/strict";
+import { createHash } from "node:crypto";
+import { beforeEach, describe, it } from "node:test";
 import {
   AccountRole,
   address,
@@ -113,8 +114,8 @@ describe("SOL vault LiteSVM tests", () => {
       ),
     ]);
 
-    expect(client.svm.getBalance(vaultAddress)).to.equal(DEPOSIT_AMOUNT);
-    expect(client.svm.getBalance(stateAddress)).to.be.a("bigint");
+    assert.equal(client.svm.getBalance(vaultAddress), DEPOSIT_AMOUNT);
+    assert.equal(typeof client.svm.getBalance(stateAddress), "bigint");
   });
 
   // A successful withdrawal reduces the vault by the requested amount.
@@ -138,7 +139,7 @@ describe("SOL vault LiteSVM tests", () => {
       ),
     ]);
 
-    expect(client.svm.getBalance(vaultAddress)).to.equal(60_000_000n);
+    assert.equal(client.svm.getBalance(vaultAddress), 60_000_000n);
   });
 
   // Closing returns the SOL, removes both PDAs, and refunds the state rent.
@@ -155,7 +156,7 @@ describe("SOL vault LiteSVM tests", () => {
 
     const ownerBalanceBeforeClose = client.svm.getBalance(client.payer.address);
     const vaultBalance = client.svm.getBalance(vaultAddress);
-    expect(vaultBalance).to.equal(DEPOSIT_AMOUNT);
+    assert.equal(vaultBalance, DEPOSIT_AMOUNT);
     if (ownerBalanceBeforeClose === null || vaultBalance === null) {
       throw new Error("The owner and vault must exist before close");
     }
@@ -164,15 +165,13 @@ describe("SOL vault LiteSVM tests", () => {
       makeVaultInstruction("close", client.payer, stateAddress, vaultAddress),
     ]);
 
-    expect(client.svm.getBalance(vaultAddress)).to.equal(null);
-    expect(client.svm.getBalance(stateAddress)).to.equal(null);
+    assert.equal(client.svm.getBalance(vaultAddress), null);
+    assert.equal(client.svm.getBalance(stateAddress), null);
     const ownerBalanceAfterClose = client.svm.getBalance(client.payer.address);
     if (ownerBalanceAfterClose === null) {
       throw new Error("The owner must exist after close");
     }
-    expect(
-      ownerBalanceAfterClose > ownerBalanceBeforeClose + vaultBalance
-    ).to.equal(true);
+    assert.ok(ownerBalanceAfterClose > ownerBalanceBeforeClose + vaultBalance);
   });
 
   // A different signer must fail the owner's PDA checks when withdrawing.
@@ -204,8 +203,8 @@ describe("SOL vault LiteSVM tests", () => {
       withdrawalError = error;
     }
 
-    expect(withdrawalError).not.to.equal(undefined);
-    expect(String(withdrawalError)).to.match(/0x7d6|2006|ConstraintSeeds/i);
-    expect(client.svm.getBalance(vaultAddress)).to.equal(DEPOSIT_AMOUNT);
+    assert.notEqual(withdrawalError, undefined);
+    assert.match(String(withdrawalError), /0x7d6|2006|ConstraintSeeds/i);
+    assert.equal(client.svm.getBalance(vaultAddress), DEPOSIT_AMOUNT);
   });
 });
