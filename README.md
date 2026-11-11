@@ -18,6 +18,8 @@ Close transfers all remaining SOL from the vault to its owner, then closes the s
 
 ## Build and tests
 
+Install Anchor CLI and Solana CLI first. This project was tested with Anchor 1.2.1 and Solana CLI 3.1.10. The build script uses platform tools version 1.52 and SBPF version 2.
+
 Install the JavaScript packages:
 
 ```text
